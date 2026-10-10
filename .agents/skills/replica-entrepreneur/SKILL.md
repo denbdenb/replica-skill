@@ -19,7 +19,7 @@ what the original's users hate, in their own words, and fixes it in yours.
 Tool in this folder:
 
 ```bash
-python3 reviews.py replica/reviews.csv --out replica/feedback.md
+python .agents/skills/replica-entrepreneur/reviews.py replica/reviews.csv --out replica/feedback.md
 ```
 
 ## The rules, which are not negotiable
@@ -62,7 +62,7 @@ best fixes hide.
 ## Step 2: rank
 
 ```bash
-python3 reviews.py replica/reviews.csv --out replica/feedback.md
+python .agents/skills/replica-entrepreneur/reviews.py replica/reviews.csv --out replica/feedback.md
 ```
 
 It sorts reviews into themes (`themes.json`, edit it for the app's category),
@@ -89,7 +89,7 @@ a trend.
 Pick the top 5 to 8 by evidence times how cheaply you can fix them. For each:
 what to build or change, size (S, M, L), which skill does it, and the
 evidence. Add each one to `replica/features.csv` as a row with `original` set
-to `no`. Pricing and billing complaints go to `/replica-launch`.
+to `no`. Pricing and billing complaints go to `replica-launch`.
 
 ## Step 5: the angle
 
@@ -109,4 +109,4 @@ A factual comparison page is a legal question for a lawyer in your country.
 
 `replica/reviews.csv`, `replica/feedback.md`, `replica/fixes.md` (three
 lists, fix plan, angle), new rows in `features.csv`, and a summary that
-states the sample size. Next: `/replica-brand`.
+states the sample size. Next: `replica-brand` (or continue via `replica-workflow`).

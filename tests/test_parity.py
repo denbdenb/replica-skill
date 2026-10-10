@@ -96,7 +96,9 @@ class Score(unittest.TestCase):
             self.assertEqual(parity.main([self.path, "--fail-under", "10"]), 0)
 
     def test_shipped_template_parses(self):
-        path = os.path.join(ROOT, "replica-recon", "features.csv")
+        path = os.path.join(ROOT, ".agents", "skills", "replica-recon", "features.csv")
+        if not os.path.exists(path):
+            path = os.path.join(ROOT, "replica-recon", "features.csv")
         r = parity.score(parity.load(path))
         self.assertGreater(r["counted"], 0)
         self.assertEqual(r["problems"], [])

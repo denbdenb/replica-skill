@@ -131,4 +131,4 @@ few weeks), L (a quarter), XL (rescope it). No promises of a perfect clone.
 
 `replica/recon.md` and `replica/features.csv`, then a five-line summary: the
 core loop, screen and flow counts, the three hardest parts, what is out of
-scope, and the next step: `/replica-architect`.
+scope, and the next step: `replica-architect` (or continue via `replica-workflow`).

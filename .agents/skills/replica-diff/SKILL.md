@@ -15,10 +15,10 @@ description: >-
 Two tools in this folder, both standard-library Python, no installs:
 
 ```bash
-python3 parity.py replica/features.csv                         # feature parity + missing list
-python3 imgdiff.py replica/screens/S07.png replica/clone-screens/S07.png --out diff-S07.png
-python3 imgdiff.py a.png b.png --json > replica/diffs/S07.json # for parity.py --visual
-python3 parity.py replica/features.csv --visual replica/diffs/*.json --markdown > replica/parity.md
+python .agents/skills/replica-diff/parity.py replica/features.csv                         # feature parity + missing list
+python .agents/skills/replica-diff/imgdiff.py replica/screens/S07.png replica/clone-screens/S07.png --out replica/diffs/diff-S07.png
+python .agents/skills/replica-diff/imgdiff.py a.png b.png --json > replica/diffs/S07.json # for parity.py --visual
+python .agents/skills/replica-diff/parity.py replica/features.csv --visual replica/diffs/*.json --markdown > replica/parity.md
 ```
 
 ## What parity means here
@@ -37,7 +37,7 @@ Make sure `replica/features.csv` is current: every row's `clone` column is
 `yes`, `partial` (with a note), `no`, or `skip` (with a reason). Then:
 
 ```bash
-python3 parity.py replica/features.csv
+python .agents/skills/replica-diff/parity.py replica/features.csv
 ```
 
 It weights must 3, should 2, could 1, counts partial as half, leaves out
@@ -54,7 +54,7 @@ user's own account, saved in `replica/screens/`. The clone's go in
 `replica/clone-screens/`.
 
 ```bash
-python3 imgdiff.py replica/screens/S07.png replica/clone-screens/S07.png --out replica/diffs/S07.png
+python .agents/skills/replica-diff/imgdiff.py replica/screens/S07.png replica/clone-screens/S07.png --out replica/diffs/S07.png
 ```
 
 Layout mode (default) turns both into edge maps, cuts them into a grid, and
@@ -89,5 +89,5 @@ Give honest numbers. A clone at 62% is at 62%.
 ## Output
 
 `replica/parity.md`, the diff images, and the top five things to build next.
-Then `/replica-build` for the gaps, or `/replica-entrepreneur` if parity is
-there.
+Then `replica-build` for the gaps, or `replica-entrepreneur` if parity is
+there (or continue via `replica-workflow`).

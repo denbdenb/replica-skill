@@ -17,7 +17,7 @@ Reads `replica/recon.md` and the screenshots in `replica/screens/`. Writes
 Tailwind mapping, and `replica/design/components.md`.
 
 ```bash
-python3 contrast.py replica/design/tokens.json     # every text pair, WCAG ratio
+python .agents/skills/replica-design/contrast.py replica/design/tokens.json     # every text pair, WCAG ratio
 ```
 
 ## The rules
@@ -53,14 +53,17 @@ From the screenshots (zoom in, use a colour picker on the user's machine):
 ## Step 2: write the tokens
 
 Fill `tokens.json`. Keep the role names. replica-brand only changes values.
-Generate `tokens.css` as custom properties and map them into Tailwind's theme
-so components use `bg-surface text-muted`, never raw hex.
+Generate platform-appropriate theme tokens:
+- **Web**: `tokens.css` (custom properties) mapped into Tailwind / CSS modules
+- **Android**: Compose `Color.kt` / `Typography.kt` in `MaterialTheme`
+- **Windows**: WinUI 3 XAML `ResourceDictionary`
+- **iOS**: SwiftUI `ShapeStyle` / `Color` assets
 
 Add a `pairs` list for every text and background combination the app uses,
 then:
 
 ```bash
-python3 contrast.py replica/design/tokens.json
+python .agents/skills/replica-design/contrast.py replica/design/tokens.json
 ```
 
 AA is the floor: 4.5:1 for body text, 3:1 for large text and for input
@@ -94,6 +97,6 @@ check.
 
 ## Output
 
-`tokens.json`, `tokens.css`, the Tailwind config, `components.md`, the
+`tokens.json`, `tokens.css` (or native theme), `components.md`, the
 primitives built, and a contrast report with zero AA failures. Next:
-`/replica-build`.
+`replica-build` (or continue via `replica-workflow`).

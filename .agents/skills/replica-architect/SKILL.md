@@ -15,31 +15,25 @@ description: >-
 Reads `replica/recon.md` and `replica/features.csv`. Writes
 `replica/architecture.md` (template: architecture.md in this folder).
 
-If there is no recon map, stop and run `/replica-recon` first. Planning a
+If there is no recon map, stop and run `replica-recon` first. Planning a
 clone from memory of what an app does is how you miss half of it.
 
-## Step 1: the stack
+## Step 1: inspect platform and select stack
 
-Use what the user already knows if they have a stack. Otherwise the default,
-because every part is managed, documented and cheap at zero users:
+First, identify whether the clone is Web, Desktop, Mobile, or CLI/Backend.
+Use what the user already knows or what exists in the repository. Do not force
+web SaaS patterns (Postgres, Stripe, Vercel) onto desktop, mobile or local tools.
 
-| layer | default | swap for |
-| --- | --- | --- |
-| web app | Next.js (App Router) + TypeScript | Remix, SvelteKit, Rails |
-| styling | Tailwind, tokens from replica-design | CSS modules |
-| mobile | Expo (React Native) | SwiftUI, Kotlin |
-| database | Postgres on Supabase or Neon | PlanetScale, SQLite (Turso) |
-| ORM | Drizzle or Prisma | raw SQL |
-| auth | Supabase Auth or Auth.js | Clerk |
-| payments | Stripe Checkout + Billing | Lemon Squeezy, Paddle |
-| email | Resend or Postmark | SES |
-| jobs | Vercel Cron, Inngest or Trigger.dev | a worker on Fly |
-| files | Supabase Storage or Cloudflare R2 | S3 |
-| hosting | Vercel | Netlify, Fly, Render |
+| target platform | recommended stack | data & storage | auth & payments |
+| --- | --- | --- | --- |
+| **Web App** | Next.js / SvelteKit / Rails + Tailwind | Postgres (Supabase/Neon) or SQLite (Turso) | Supabase/Auth.js; Stripe (if paid) |
+| **Desktop App** | WinUI 3 (.NET), WPF, Tauri, Electron | SQLite / local file store | OS credentials; in-app licensing / Stripe |
+| **Mobile App** | Android (Compose/Kotlin), iOS (SwiftUI), Flutter | Room (SQLite) / CoreData / DataStore | Credential Manager / RevenueCat / Stores |
+| **CLI / Backend** | Python, Go, Node.js, Rust | SQLite / Postgres / JSON | API keys / local config; none |
 
-Write each choice with one line of why. One database. No microservices. The
-clone does not need the original's architecture, it needs the original's
-features.
+Write each choice with one line of why. One database. No unnecessary microservices.
+The clone does not need the original's architecture, it needs the original's
+features. Cloud services (payments, email, hosting) are conditional on the app's needs.
 
 ## Step 2: the schema
 
@@ -112,4 +106,4 @@ Each milestone lists its screens (S-IDs), tables and routes.
 
 `replica/architecture.md`, the SQL in `replica/schema.sql` or as the first
 migration, and a summary: stack in one line, table count, route count, the
-three riskiest parts, and the next step: `/replica-design`.
+three riskiest parts, and the next step: `replica-design` (or continue via `replica-workflow`).

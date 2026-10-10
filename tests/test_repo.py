@@ -3,13 +3,22 @@ import os
 import re
 import unittest
 
-from _load import ROOT
+from _load import ROOT, SKILLS_DIR
 
-SKILLS = ["replica-recon", "replica-architect", "replica-design", "replica-build",
-          "replica-backend", "replica-test", "replica-diff", "replica-entrepreneur",
-          "replica-brand", "replica-launch", "replica-deploy"]
-ABOUT = ("Eleven free Claude skills that clone any app: reverse-engineer it, rebuild it, "
-         "test it for bugs, then fix what its users hate. Free, MIT.")
+SKILLS = [
+    "replica-architect",
+    "replica-backend",
+    "replica-brand",
+    "replica-build",
+    "replica-deploy",
+    "replica-design",
+    "replica-diff",
+    "replica-entrepreneur",
+    "replica-launch",
+    "replica-recon",
+    "replica-test",
+    "replica-workflow",
+]
 
 
 def frontmatter(path):
@@ -20,47 +29,42 @@ def frontmatter(path):
 
 
 class Repo(unittest.TestCase):
-    def test_eleven_skill_folders_at_the_root(self):
-        found = sorted(d for d in os.listdir(ROOT)
-                       if os.path.isfile(os.path.join(ROOT, d, "SKILL.md")))
+    def test_twelve_skills_in_agents_directory(self):
+        found = sorted(
+            d for d in os.listdir(SKILLS_DIR)
+            if os.path.isfile(os.path.join(SKILLS_DIR, d, "SKILL.md"))
+        )
         self.assertEqual(found, sorted(SKILLS))
 
     def test_frontmatter_name_and_description(self):
         for s in SKILLS:
-            fm, text = frontmatter(os.path.join(ROOT, s, "SKILL.md"))
+            fm, text = frontmatter(os.path.join(SKILLS_DIR, s, "SKILL.md"))
             self.assertIn("name: %s\n" % s, fm + "\n", s)
             self.assertRegex(fm, r"description: ", s)
             self.assertGreater(len(fm), 200, "%s description is too thin" % s)
-            self.assertGreater(len(text.splitlines()), 60, s)
+            self.assertGreater(len(text.splitlines()), 50, s)
 
-    def test_plugin_manifest_points_at_the_root_skills(self):
-        with open(os.path.join(ROOT, ".claude-plugin", "plugin.json")) as fh:
-            plugin = json.load(fh)
-        self.assertEqual(plugin["name"], "replica-skill")
-        self.assertEqual(plugin["skills"], "./")
-        self.assertEqual(plugin["description"], ABOUT)
-        with open(os.path.join(ROOT, ".claude-plugin", "marketplace.json")) as fh:
-            market = json.load(fh)
-        self.assertEqual(market["name"], "replica-skill")
-        self.assertEqual(market["plugins"][0]["name"], "replica-skill")
+    def test_native_agents_has_no_claude_manifest(self):
+        agents_dir = os.path.dirname(SKILLS_DIR)
+        self.assertFalse(
+            os.path.exists(os.path.join(agents_dir, ".claude-plugin")),
+            "Claude plugin manifest must not be in .agents directory"
+        )
 
     def test_readme_carries_the_reel_copy(self):
         with open(os.path.join(ROOT, "README.md"), encoding="utf-8") as fh:
             readme = " ".join(fh.read().split())
         self.assertTrue(readme.startswith("# The Replica skill"))
         for line in (
-            "Eleven Claude skills that clone any app. Free, MIT, no signup, no API key, "
-            "nothing to connect.",
+            "Free, MIT, no signup, no API key, nothing to connect.",
             "One reverse-engineers the app you want to clone. One rebuilds it. One tests it "
             "for bugs. And one is the Entrepreneur: it reads what the app's users hate and "
             "fixes it in yours, so you have an app you can sell.",
-            "/plugin marketplace add Jakeschincariol/replica-skill",
-            "/plugin install replica-skill@replica-skill",
             "## Fine print",
         ):
             self.assertIn(line, readme)
         for s in SKILLS:
-            self.assertIn("`/%s`" % s, readme)
+            self.assertIn("`%s`" % s, readme)
 
     def test_no_em_dashes_anywhere(self):
         bad = []

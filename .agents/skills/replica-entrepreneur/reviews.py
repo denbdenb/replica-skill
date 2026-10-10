@@ -299,6 +299,9 @@ def main(argv=None):
         return 0
     text = render(result, dropped, dupes)
     if args.out:
+        out_dir = os.path.dirname(args.out)
+        if out_dir:
+            os.makedirs(out_dir, exist_ok=True)
         with open(args.out, "w", encoding="utf-8") as fh:
             fh.write(text)
         print("wrote %s" % args.out)

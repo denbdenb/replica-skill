@@ -130,8 +130,24 @@ class ReadWrite(unittest.TestCase):
     def test_not_a_png(self):
         with open(self.p("x.png"), "wb") as fh:
             fh.write(b"GIF89a")
-        with self.assertRaises(imgdiff.PngError):
+        with self.assertRaises(imgdiff.PngError) as ctx:
             imgdiff.read_png(self.p("x.png"))
+        self.assertIn("GIF", str(ctx.exception))
+
+    def test_unsupported_formats_reported_clearly(self):
+        formats = [
+            ("jpeg.jpg", b"\xff\xd8\xff\xe0\x00\x10JFIF", "JPEG"),
+            ("image.webp", b"RIFF\x12\x00\x00\x00WEBPVP8 ", "WebP"),
+            ("bitmap.bmp", b"BM\x36\x00\x00\x00\x00\x00\x00\x00", "BMP"),
+            ("vector.svg", b"<svg xmlns='http://www.w3.org/2000/svg'></svg>", "SVG"),
+        ]
+        for fname, header, expected_hint in formats:
+            path = self.p(fname)
+            with open(path, "wb") as fh:
+                fh.write(header)
+            with self.assertRaises(imgdiff.PngError) as ctx:
+                imgdiff.read_png(path)
+            self.assertIn(expected_hint, str(ctx.exception))
 
 
 class Compare(unittest.TestCase):

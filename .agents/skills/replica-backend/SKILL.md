@@ -19,10 +19,13 @@ Reads `replica/architecture.md`. Writes migrations and server code, and keeps
 - **Official, public APIs only, with the user's own keys.** Never call the
   original app's private endpoints, never reuse its OAuth client, never proxy
   through it.
-- **The user creates accounts and keys.** Claude never signs up for services,
+- **The user creates accounts and keys.** The agent never signs up for services,
   never types a password, card or live key. The user creates the Stripe,
-  Supabase, Resend or Google Cloud project and puts keys in `.env.local`.
-  Claude writes `.env.example` with every variable name and no values.
+  Supabase, Resend or Google Cloud project and puts keys in `.env.local` (or
+  local config). The agent writes `.env.example` with variable names and no values.
+- **Conditional on app type**: For local-first desktop, mobile or CLI apps that
+  do not use cloud backends, focus on local persistence (SQLite, Room, CoreData)
+  and skip cloud auth/Stripe unless requested.
 - **Test mode first.** Stripe test keys and test cards until replica-deploy.
 
 ## Auth
@@ -87,4 +90,4 @@ launch, which takes weeks. Start it early and write that in `backend.md`.
 
 Working auth, database, payments in test mode, email and the integrations,
 `.env.example`, `replica/backend.md` with the checklist ticked, feature
-matrix rows updated. Next: `/replica-test`.
+matrix rows updated. Next: `replica-test` (or continue via `replica-workflow`).

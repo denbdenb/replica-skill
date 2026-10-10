@@ -40,17 +40,20 @@ Number every case: F01-H1, F01-E3, F01-N2.
 
 ## Step 2: automate what you can
 
-Playwright, one spec per flow, against the local dev server with seed data.
-Use roles and labels for selectors (`getByRole('button', { name: 'Book' })`),
-never CSS classes. See `e2e.example.spec.ts`.
+Choose the test automation harness appropriate for the target platform:
 
-```bash
-npm i -D @playwright/test && npx playwright install chromium
-npx playwright test
-```
-
-Add to every spec: fail on console errors, fail on any 5xx response, and an
-axe accessibility scan (`@axe-core/playwright`) on each screen.
+- **Web**: Playwright, one spec per flow, against the local dev server with seed
+  data. Use roles and labels for selectors (`getByRole('button', { name: 'Book' })`),
+  never CSS classes. See `e2e.example.spec.ts`. Add `@axe-core/playwright` accessibility
+  scans on each screen.
+  ```bash
+  npm i -D @playwright/test && npx playwright install chromium
+  npx playwright test
+  ```
+- **Windows Desktop**: FlaUI or WinApp CLI UI automation test harness for WinUI 3 / WPF.
+- **Android**: Jetpack Compose UI tests (`createComposeRule()`) or ADB instrumentation.
+- **iOS**: XCUITest / Swift Testing.
+- **CLI / Backend**: Native test runner (e.g. `pytest`, `python -m unittest`, `go test`, `cargo test`).
 
 ## Step 3: click through the rest
 
@@ -84,4 +87,4 @@ it pass, keep the test. Re-run the whole suite after each batch. Update
 
 `test-plan.md`, the specs, `bugs.md`, and a summary: cases run, passed,
 failed, bugs by severity, fixed so far. Ship nothing with an open S1. Next:
-`/replica-diff`.
+`replica-diff` (or continue via `replica-workflow`).

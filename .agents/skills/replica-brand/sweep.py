@@ -29,9 +29,10 @@ import os
 import re
 import sys
 
-SKIP_DIRS = {".git", "node_modules", ".next", ".nuxt", ".svelte-kit", "dist", "build",
-             "out", ".vercel", ".turbo", ".cache", "coverage", "__pycache__", ".venv",
-             "venv", "Pods", ".expo", "DerivedData", ".gradle"}
+SKIP_DIRS = {".git", ".agents", ".agent", ".claude", "node_modules", ".next", ".nuxt",
+             ".svelte-kit", "dist", "build", "out", ".vercel", ".turbo", ".cache",
+             "coverage", "__pycache__", ".venv", "venv", "Pods", ".expo", "DerivedData",
+             ".gradle"}
 SKIP_FILES = {"package-lock.json", "yarn.lock", "pnpm-lock.yaml", "bun.lockb",
               "Podfile.lock", "Cargo.lock", "poetry.lock"}
 BINARY_EXT = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".icns", ".pdf", ".zip",

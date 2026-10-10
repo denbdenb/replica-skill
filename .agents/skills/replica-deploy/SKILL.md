@@ -19,8 +19,8 @@ Reads everything in `replica/`. Writes `replica/deploy.md` (the checklist in
 
 - **Nothing goes live without the user's go.** Show the preflight results and
   ask.
-- **The user buys and signs in.** Claude never buys a domain, enters a card,
-  types a password or pastes a live key. Claude writes the exact DNS records,
+- **The user buys and signs in.** The agent never buys a domain, enters a card,
+  types a password or pastes a live key. The agent writes the exact DNS records,
   env var names and commands; the user does the account steps.
 - **Not until it is rebranded.** The sweep must be clean. No exceptions.
 
@@ -29,16 +29,12 @@ Reads everything in `replica/`. Writes `replica/deploy.md` (the checklist in
 Run every check and paste the results into `deploy.md`:
 
 ```bash
-npx playwright test                                                  # replica-test
-python3 ../replica-diff/parity.py replica/features.csv               # must-haves done
-python3 ../replica-brand/sweep.py . --config replica/brand.json      # exit 0: clean
-python3 ../replica-launch/listing.py replica/launch/listing.json     # if shipping to stores
-npm run build                                                        # production build passes
+npx playwright test                                                        # or native test suite (dotnet test, ./gradlew test, pytest)
+python .agents/skills/replica-diff/parity.py replica/features.csv           # must-haves done
+python .agents/skills/replica-brand/sweep.py . --config replica/brand.json  # exit 0: clean
+python .agents/skills/replica-launch/listing.py replica/launch/listing.json # if shipping to app stores
+npm run build                                                              # or native build/publish (dotnet publish, ./gradlew assembleRelease)
 ```
-
-(Paths are relative to wherever the pack is installed. Under
-`~/.claude/skills/` that is `~/.claude/skills/replica-diff/parity.py` and so
-on.)
 
 Plus by hand: no open S1 or S2 bugs, privacy policy and terms pages live
 (listing every processor), cookie banner if you use non-essential cookies in
@@ -90,12 +86,14 @@ core flow's API, logs kept, analytics (a privacy-friendly one avoids the
 cookie banner), and an alert to the user's email or phone. Then do the core
 flow on the live site yourself, and ask the user to do it on their phone.
 
-## Step 5: mobile, if there is an app
+## Step 5: distribution (mobile / desktop / CLI)
 
-Expo: `eas build` then `eas submit` to TestFlight and Play internal testing.
-Native: archive in Xcode, upload to App Store Connect; Gradle bundle to Play
-Console. The user owns the developer accounts ($99 a year for Apple, $25 once
-for Google). Beta first, then review with the listing from replica-launch.
+- **Mobile**: Expo `eas build` and `eas submit`; native Xcode archive to App
+  Store Connect; Android Gradle bundle to Google Play Console. Beta testing first.
+- **Desktop**: MSIX or self-contained executable for Windows (WinApp / WinUI),
+  DMG / notarization for macOS, or GitHub Releases.
+- **CLI / Backend**: Container image to registry (Docker / GHCR), package manager
+  release (PyPI / npm / crates.io), or binary release assets.
 
 ## Output
 

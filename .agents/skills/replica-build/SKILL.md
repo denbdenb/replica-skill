@@ -51,8 +51,9 @@ Work in the order of `architecture.md`. For each screen:
 4. **Every state**: empty, loading (skeletons, not spinners, if the original
    does), filled, error, no permission, long content (a 60 character name),
    mobile width.
-5. Basics, every time: semantic HTML, labels on inputs, keyboard reachable,
-   visible focus, images with alt text.
+5. Basics, every time: accessible structure (semantic HTML, WinUI controls,
+   Compose semantics, SwiftUI accessibility elements), labels on inputs, keyboard /
+   touch reachable, visible focus, images with alt / description text.
 6. Set the matching rows in `features.csv` to `yes` or `partial` (with a note).
 7. Screenshot it at the same viewport as the reference into
    `replica/clone-screens/S07.png` for replica-diff.
@@ -61,9 +62,9 @@ Work in the order of `architecture.md`. For each screen:
 ## Definition of done, per screen
 
 - [ ] every state from the recon map, plus empty, error and loading
-- [ ] works at 390px and 1440px wide
-- [ ] keyboard only: can complete the flow
-- [ ] no console errors
+- [ ] responsive at target form factors (e.g. mobile 390px, desktop 1440px)
+- [ ] accessible: keyboard / screen reader can complete the flow
+- [ ] no console / runtime errors
 - [ ] no hard-coded copy borrowed from the original
 - [ ] features.csv updated
 - [ ] screenshot saved for diff
@@ -84,4 +85,5 @@ calls. Then build your own version of the behaviour.
 
 Screens built, the feature matrix updated, screenshots saved, and a summary:
 screens done of total, must-haves done of total, what is next. Then
-`/replica-backend` if the data layer is still fake, else `/replica-test`.
+`replica-backend` if a cloud/API data layer is needed, else `replica-test`
+(or continue via `replica-workflow`).

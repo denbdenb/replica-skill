@@ -30,6 +30,7 @@ PNGs are refused with a message: re-save the screenshot without interlacing.
 import argparse
 import json
 import math
+import os
 import struct
 import sys
 import zlib
@@ -112,6 +113,18 @@ def read_png(path):
     with open(path, "rb") as fh:
         data = fh.read()
     if data[:8] != SIG:
+        if data.startswith(b"\xff\xd8\xff"):
+            raise PngError("%s is a JPEG image, not a PNG. Convert to PNG before diffing." % path)
+        elif data.startswith(b"GIF87a") or data.startswith(b"GIF89a"):
+            raise PngError("%s is a GIF image, not a PNG. Convert to PNG before diffing." % path)
+        elif data.startswith(b"RIFF") and len(data) >= 12 and data[8:12] == b"WEBP":
+            raise PngError("%s is a WebP image, not a PNG. Convert to PNG before diffing." % path)
+        elif data.startswith(b"BM"):
+            raise PngError("%s is a BMP image, not a PNG. Convert to PNG before diffing." % path)
+        elif data.startswith(b"II*\x00") or data.startswith(b"MM\x00*"):
+            raise PngError("%s is a TIFF image, not a PNG. Convert to PNG before diffing." % path)
+        elif b"<svg" in data[:512].lower() or (b"<?xml" in data[:512].lower() and b"<svg" in data[:1024].lower()):
+            raise PngError("%s is an SVG vector graphic, not a PNG. Rasterize to PNG before diffing." % path)
         raise PngError("%s is not a PNG" % path)
     pos = 8
     ihdr = None
@@ -138,7 +151,7 @@ def read_png(path):
     width, height, depth, color, _comp, _filt, interlace = ihdr
     if interlace:
         raise PngError("%s is interlaced. Re-save it without interlacing "
-                       "(on a Mac: sips -s format png in.png --out out.png)" % path)
+                       "(e.g., using an image editor or Python Pillow: Image.open(f).save(f))" % path)
     channels = {0: 1, 2: 3, 3: 1, 4: 2, 6: 4}.get(color)
     if channels is None:
         raise PngError("unsupported PNG colour type %d" % color)
@@ -204,6 +217,9 @@ def write_png(path, width, height, rows):
         return struct.pack(">I", len(body)) + kind + body + struct.pack(">I", crc)
 
     ihdr = struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0)
+    out_dir = os.path.dirname(path)
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
     with open(path, "wb") as fh:
         fh.write(SIG + chunk(b"IHDR", ihdr) +
                  chunk(b"IDAT", zlib.compress(bytes(raw), 6)) +

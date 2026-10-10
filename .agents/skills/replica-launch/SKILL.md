@@ -17,7 +17,7 @@ and `replica/brand.json`. Writes `replica/launch/`: `landing.md`,
 `pricing.md`, `listing.json`, `launch-plan.md`.
 
 ```bash
-python3 listing.py replica/launch/listing.json      # limits, claims, the original's name
+python .agents/skills/replica-launch/listing.py replica/launch/listing.json      # limits, claims, the original's name
 ```
 
 Start from `listing.example.json` in this folder.
@@ -63,12 +63,13 @@ Copy in the brand voice. Run replica-design's contrast check on the page.
   emails, no surprise per-seat jumps.
 - The Stripe products and prices to create (the user creates them).
 
-## Step 3: store listing
+## Step 3: store listing (conditional for mobile / app stores)
 
-Fill `listing.json`, then:
+If shipping a mobile app to Apple App Store or Google Play (or desktop app to
+Microsoft Store / Mac App Store), prepare and lint `listing.json`:
 
 ```bash
-python3 listing.py replica/launch/listing.json
+python .agents/skills/replica-launch/listing.py replica/launch/listing.json
 ```
 
 It checks App Store limits (name 30, subtitle 30, promotional text 170,
@@ -96,5 +97,5 @@ leads with the fix, and the first 10 users to talk to by hand.
 
 ## Output
 
-`replica/launch/` complete, the landing page built, `listing.py` passing.
-Next: `/replica-deploy`.
+`replica/launch/` complete, the landing page built, `listing.py` passing
+(if shipping to stores). Next: `replica-deploy` (or continue via `replica-workflow`).

@@ -103,6 +103,19 @@ class Score(unittest.TestCase):
         self.assertGreater(r["counted"], 0)
         self.assertEqual(r["problems"], [])
 
+    def test_compact_json_and_summary_cli(self):
+        buf_compact = io.StringIO()
+        with redirect_stdout(buf_compact):
+            self.assertEqual(parity.main([self.path, "--compact-json"]), 0)
+        self.assertNotIn("\n", buf_compact.getvalue().strip())
+        data = json.loads(buf_compact.getvalue())
+        self.assertIn("overall", data)
+
+        buf_sum = io.StringIO()
+        with redirect_stdout(buf_sum):
+            self.assertEqual(parity.main([self.path, "--summary"]), 0)
+        self.assertIn("Parity", buf_sum.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()

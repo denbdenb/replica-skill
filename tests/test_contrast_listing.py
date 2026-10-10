@@ -45,6 +45,27 @@ class Contrast(unittest.TestCase):
             self.assertEqual(contrast.main(["#aaaaaa", "#ffffff"]), 1)
             self.assertEqual(contrast.main(["#222222", "#ffffff"]), 0)
 
+    def test_lut_matches_exact_srgb_channels(self):
+        def ref_chan(c):
+            c = c / 255.0
+            return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+
+        for c in range(256):
+            self.assertEqual(contrast._SRGB_LUT[c], ref_chan(c))
+
+    def test_compact_json_and_summary_cli(self):
+        buf_compact = io.StringIO()
+        with redirect_stdout(buf_compact):
+            self.assertEqual(contrast.main(["#222222", "#ffffff", "--compact-json"]), 0)
+        self.assertNotIn("\n", buf_compact.getvalue().strip())
+        data = json.loads(buf_compact.getvalue())
+        self.assertIsInstance(data, list)
+
+        buf_sum = io.StringIO()
+        with redirect_stdout(buf_sum):
+            self.assertEqual(contrast.main(["#222222", "#ffffff", "--summary"]), 0)
+        self.assertIn("Contrast check PASSED", buf_sum.getvalue())
+
 
 class Listing(unittest.TestCase):
     def good(self):
@@ -116,6 +137,23 @@ class Listing(unittest.TestCase):
             with redirect_stdout(io.StringIO()):
                 self.assertEqual(listing.main([p]), 0)
                 self.assertEqual(listing.main([p, "--avoid", "Acuity"]), 1)
+
+    def test_compact_json_and_summary_cli(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "l.json")
+            with open(p, "w") as fh:
+                json.dump(self.good(), fh)
+            buf_compact = io.StringIO()
+            with redirect_stdout(buf_compact):
+                self.assertEqual(listing.main([p, "--compact-json"]), 0)
+            self.assertNotIn("\n", buf_compact.getvalue().strip())
+            data = json.loads(buf_compact.getvalue())
+            self.assertIsInstance(data, list)
+
+            buf_sum = io.StringIO()
+            with redirect_stdout(buf_sum):
+                self.assertEqual(listing.main([p, "--summary"]), 0)
+            self.assertIn("Listing lint PASSED", buf_sum.getvalue())
 
 
 if __name__ == "__main__":

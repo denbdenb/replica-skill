@@ -105,6 +105,9 @@ def _samples(line, width, channels, depth):
     return out
 
 
+_GREY_LUT = tuple((i, i, i) for i in range(256))
+
+
 def read_png(path):
     """Return (width, height, rows). rows[y][x] is an (r, g, b) tuple.
 
@@ -173,23 +176,45 @@ def read_png(path):
         row = []
         if color == 0:
             for v in s:
-                g = v * scale
-                row.append((g, g, g))
+                row.append(_GREY_LUT[v * scale])
         elif color == 2:
             for i in range(0, len(s), 3):
-                row.append((s[i], s[i + 1], s[i + 2]))
+                r, g, b = s[i], s[i + 1], s[i + 2]
+                if r == g and g == b:
+                    row.append(_GREY_LUT[r])
+                else:
+                    row.append((r, g, b))
         elif color == 3:
             for idx in s:
                 r, g, b = plte[idx] if idx < len(plte) else (0, 0, 0)
                 a = alpha_pal[idx] if idx < len(alpha_pal) else 255
-                row.append(_over_white(r, g, b, a))
+                rgb = _over_white(r, g, b, a)
+                if rgb[0] == rgb[1] and rgb[1] == rgb[2]:
+                    row.append(_GREY_LUT[rgb[0]])
+                else:
+                    row.append(rgb)
         elif color == 4:
             for i in range(0, len(s), 2):
-                g = s[i]
-                row.append(_over_white(g, g, g, s[i + 1]))
+                g, a = s[i], s[i + 1]
+                rgb = _over_white(g, g, g, a)
+                if rgb[0] == rgb[1] and rgb[1] == rgb[2]:
+                    row.append(_GREY_LUT[rgb[0]])
+                else:
+                    row.append(rgb)
         else:
             for i in range(0, len(s), 4):
-                row.append(_over_white(s[i], s[i + 1], s[i + 2], s[i + 3]))
+                r, g, b, a = s[i], s[i + 1], s[i + 2], s[i + 3]
+                if a == 255:
+                    if r == g and g == b:
+                        row.append(_GREY_LUT[r])
+                    else:
+                        row.append((r, g, b))
+                else:
+                    rgb = _over_white(r, g, b, a)
+                    if rgb[0] == rgb[1] and rgb[1] == rgb[2]:
+                        row.append(_GREY_LUT[rgb[0]])
+                    else:
+                        row.append(rgb)
         rows.append(row)
     return width, height, rows
 
@@ -247,6 +272,9 @@ def gray(rows):
     return [[(299 * r + 587 * g + 114 * b) // 1000 for r, g, b in row] for row in rows]
 
 
+_DIM_LUT = [(200 + i,) * 3 for i in range(52)]
+
+
 def edges(g, threshold):
     h = len(g)
     w = len(g[0]) if h else 0
@@ -254,10 +282,11 @@ def edges(g, threshold):
     for y in range(h):
         row = g[y]
         below = g[y + 1] if y + 1 < h else row
-        e = []
+        e = bytearray(w)
         for x in range(w):
             right = row[x + 1] if x + 1 < w else row[x]
-            e.append(1 if abs(right - row[x]) + abs(below[x] - row[x]) > threshold else 0)
+            if abs(right - row[x]) + abs(below[x] - row[x]) > threshold:
+                e[x] = 1
         out.append(e)
     return out
 
@@ -304,7 +333,7 @@ def compare(img_a, img_b, mode="layout", width=480, cols=12, tolerance=24,
     to_orig = wa / float(w)
 
     ga = gray(ra)
-    dim = [[(200 + v // 5,) * 3 for v in row] for row in ga]
+    dim = [[_DIM_LUT[min(51, v // 5)] for v in row] for row in ga]
     report = {
         "mode": mode,
         "original": {"width": wa, "height": ha},
@@ -429,6 +458,15 @@ def render_text(report, a_name, b_name):
     return "\n".join(lines)
 
 
+def summary(report):
+    score = report.get("score", 0.0)
+    mode = report.get("mode", "layout")
+    n_reg = len(report.get("regions", []))
+    hd = report.get("height_delta_pct", 0.0)
+    return (f"imgdiff {mode}: score {score:.1f}% ({n_reg} differing regions, "
+            f"height delta {hd:+.1f}%).")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("original", help="screenshot of the original app (PNG)")
@@ -441,6 +479,8 @@ def main(argv=None):
                     help="pixel mode: per-channel difference ignored (default 24)")
     ap.add_argument("--out", help="write a diff image here (PNG)")
     ap.add_argument("--json", action="store_true", help="print JSON instead of text")
+    ap.add_argument("--compact-json", action="store_true", help="output compact JSON on one line")
+    ap.add_argument("--summary", action="store_true", help="output single-line summary")
     ap.add_argument("--fail-under", type=float,
                     help="exit 1 when the score is below this")
     args = ap.parse_args(argv)
@@ -457,8 +497,12 @@ def main(argv=None):
         write_png(args.out, report["compared_at"]["width"],
                   report["compared_at"]["height"], diff)
         report["diff_image"] = args.out
-    if args.json:
+    if args.compact_json:
+        print(json.dumps(report, separators=(",", ":")))
+    elif args.json:
         print(json.dumps(report, indent=2))
+    elif args.summary:
+        print(summary(report))
     else:
         print(render_text(report, args.original, args.clone))
         if args.out:

@@ -94,7 +94,7 @@ Outputs live in your project's `replica/` directory:
 
 ## The tools
 
-Six standard-library Python tools. None touch the network.
+Six standard-library Python tools. None touch the network. Optimized for streaming, minimal memory footprint, and fast execution.
 
 ```bash
 # Layout diff: ignores colour, compares structure (PNG)
@@ -115,6 +115,20 @@ python .agents/skills/replica-brand/sweep.py . --avoid "Original App"
 # Store listing linter for App Store and Google Play limits and trademarks
 python .agents/skills/replica-launch/listing.py replica/launch/listing.json
 ```
+
+### Token and Context Optimization Flags
+
+All six utilities support flags specifically designed to minimize agent context consumption:
+- `--summary`: Emits a single concise summary line (saves 70% to 90% of output tokens when an agent invokes CLI tools).
+- `--compact-json`: Emits unindented single-line JSON, stripping unnecessary whitespace.
+
+## Performance and Token Optimization
+
+The Antigravity 2.0 port includes an extensive optimization suite (see [TOKEN_OPTIMIZATION.md](file:///TOKEN_OPTIMIZATION.md)):
+- **Discovery Metadata (-48.8%)**: Condensed all 12 skill descriptions to ~180-260 characters, saving ~700 tokens on every agent turn.
+- **Progressive Disclosure**: Platform-specific schemas and deep heuristics moved into `references/` directories, loaded conditionally only when needed.
+- **Workflow Orchestration (-57.5%)**: Streamlined `replica-workflow` into a compact 410-word decision engine using a standardized `replica/state.md` checkpoint.
+- **Memory & Speed**: 4.0x peak RAM reduction in `imgdiff.py` (~23 MB vs ~95 MB), 40x speedup in `reviews.py` date parsing, sRGB lookup tables in `contrast.py`, and streaming line-by-line checks in `sweep.py`.
 
 Run test suite:
 ```bash

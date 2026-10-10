@@ -1,14 +1,8 @@
 ---
 name: replica-backend
 description: >-
-  Builds the backend of an app clone: auth, database migrations and access
-  rules, payments with Stripe, email, background jobs and third-party
-  integrations through official APIs only, plus a security checklist. Use when
-  the user says "add login", "set up auth", "wire up the database", "add
-  payments", "connect Stripe", "add Google Calendar", "send emails",
-  "backend for my clone", or when /replica-build is running on fake data.
+  Implements backend services for an app clone: authentication, database migrations, Stripe payments, background jobs, and official API integrations with clean-room security. Triggers: backend implementation, setup auth, connect database.
 ---
-
 # replica-backend
 
 Reads `replica/architecture.md`. Writes migrations and server code, and keeps

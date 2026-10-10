@@ -155,12 +155,22 @@ def render(listing, issues):
     return "\n".join(out)
 
 
+def summary(issues):
+    errs = sum(1 for i in issues if i["level"] == "error")
+    warns = len(issues) - errs
+    if errs == 0 and warns == 0:
+        return "Listing lint PASSED: 0 errors, 0 warnings."
+    return f"Listing lint {'FAILED' if errs else 'WARNING'}: {errs} errors, {warns} warnings."
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("listing", help="listing.json")
     ap.add_argument("--avoid", help="comma-separated names that must not appear "
                                     "(the original app, its company)")
-    ap.add_argument("--json", action="store_true")
+    ap.add_argument("--json", action="store_true", help="output formatted JSON")
+    ap.add_argument("--compact-json", action="store_true", help="output compact JSON on one line")
+    ap.add_argument("--summary", action="store_true", help="output single-line summary")
     args = ap.parse_args(argv)
     try:
         with open(args.listing, encoding="utf-8") as fh:
@@ -170,8 +180,12 @@ def main(argv=None):
         return 2
     avoid = args.avoid.split(",") if args.avoid else None
     issues = lint(listing, avoid)
-    if args.json:
+    if args.compact_json:
+        print(json.dumps(issues, separators=(",", ":")))
+    elif args.json:
         print(json.dumps(issues, indent=2))
+    elif args.summary:
+        print(summary(issues))
     else:
         print(render(listing, issues))
     return 1 if any(i["level"] == "error" for i in issues) else 0

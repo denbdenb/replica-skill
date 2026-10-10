@@ -1,15 +1,8 @@
 ---
 name: replica-test
 description: >-
-  Clicks through every flow of an app clone and tests it for bugs: a test plan
-  generated from the recon flows with happy paths and edge cases, Playwright
-  end-to-end tests where possible, a browser click-through where not, and bug
-  reports in a fixed format with severity, steps and evidence. Use when the
-  user says "test my clone", "find bugs", "QA this", "click through
-  everything", "write e2e tests", "does it work", or after /replica-build or
-  /replica-backend.
+  Executes systematic QA testing across user flows: generates structured test plans, executes automated Playwright or manual click-through scripts, and logs reproducible bug reports. Triggers: test the clone, run QA, automated e2e tests, find bugs.
 ---
-
 # replica-test
 
 Reads the flows in `replica/recon.md`. Writes `replica/test-plan.md`,
@@ -42,18 +35,12 @@ Number every case: F01-H1, F01-E3, F01-N2.
 
 Choose the test automation harness appropriate for the target platform:
 
-- **Web**: Playwright, one spec per flow, against the local dev server with seed
-  data. Use roles and labels for selectors (`getByRole('button', { name: 'Book' })`),
-  never CSS classes. See `e2e.example.spec.ts`. Add `@axe-core/playwright` accessibility
-  scans on each screen.
-  ```bash
-  npm i -D @playwright/test && npx playwright install chromium
-  npx playwright test
-  ```
-- **Windows Desktop**: FlaUI or WinApp CLI UI automation test harness for WinUI 3 / WPF.
-- **Android**: Jetpack Compose UI tests (`createComposeRule()`) or ADB instrumentation.
-- **iOS**: XCUITest / Swift Testing.
-- **CLI / Backend**: Native test runner (e.g. `pytest`, `python -m unittest`, `go test`, `cargo test`).
+- **Web**: Playwright with accessibility testing (`@axe-core/playwright`). See `e2e.example.spec.ts`.
+- **Windows Desktop**: FlaUI or WinApp CLI UI automation test harness.
+- **Android / iOS**: Jetpack Compose UI tests or XCUITest.
+- **CLI / Backend**: Native test runner (`pytest`, `python -m unittest`, `go test`, `cargo test`).
+
+For detailed platform automation setups and commands, consult [platform-testing.md](references/platform-testing.md).
 
 ## Step 3: click through the rest
 

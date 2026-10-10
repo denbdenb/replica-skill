@@ -1,16 +1,8 @@
 ---
 name: replica-entrepreneur
 description: >-
-  Researches the app being cloned and reads what its real users say in public
-  reviews (App Store, Google Play, G2, Capterra, Trustpilot, Reddit, Hacker
-  News, its own feature-request board), then ranks what they hate, what is
-  missing and what is unsolved, turns it into a fix plan for the clone and a
-  positioning angle you can sell. Every quote is real, verbatim and linked.
-  Use when the user says "what do people hate about X", "read the reviews",
-  "how do I make mine better", "find the gap", "what features are missing",
-  "how do I position this", "make it sellable", or after /replica-diff.
+  Analyzes verified public user reviews across app stores and forums to rank user complaints, unfulfilled feature requests, and commercial positioning opportunities. Triggers: user review analysis, find competitive gap, what users hate about X.
 ---
-
 # replica-entrepreneur
 
 A straight copy of an app has no reason to exist. This skill finds the reason:

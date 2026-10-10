@@ -1,14 +1,8 @@
 ---
 name: replica-build
 description: >-
-  Rebuilds an app screen by screen from the recon map: app shell first, then
-  the core flow as a vertical slice, then every screen with all its states,
-  ticking off the feature matrix as it goes. Writes every line fresh, never
-  the original's code, assets or copy. Use when the user says "build the
-  clone", "build screen S07", "start building", "rebuild this screen",
-  "implement the booking page", or after /replica-design.
+  Builds clean-room UI screens and interactive user flows from specifications: shell first, followed by vertical slices and complete state handling without original assets or code. Triggers: build screen, build clone UI, implement interface.
 ---
-
 # replica-build
 
 Reads `replica/recon.md`, `replica/architecture.md`, `replica/design/`.

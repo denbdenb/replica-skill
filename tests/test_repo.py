@@ -21,11 +21,31 @@ SKILLS = [
 ]
 
 
-def frontmatter(path):
+def parse_skill_metadata(path):
     with open(path, encoding="utf-8") as fh:
         text = fh.read()
     m = re.match(r"^---\n(.*?)\n---\n", text, re.S)
-    return (m.group(1) if m else ""), text
+    if not m:
+        return None, "", text
+    fm = m.group(1)
+    name_m = re.search(r"^name:\s*(.+)$", fm, re.M)
+    name = name_m.group(1).strip() if name_m else None
+    
+    desc_lines = []
+    in_desc = False
+    for line in fm.splitlines():
+        if line.startswith("description:"):
+            in_desc = True
+            val = line.split("description:", 1)[1].strip()
+            if val and val not in (">-", "|-", ">", "|"):
+                desc_lines.append(val)
+        elif in_desc:
+            if re.match(r"^[a-zA-Z0-9_-]+:", line):
+                in_desc = False
+            else:
+                desc_lines.append(line.strip())
+    desc = " ".join(" ".join(desc_lines).split())
+    return name, desc, text
 
 
 class Repo(unittest.TestCase):
@@ -38,11 +58,28 @@ class Repo(unittest.TestCase):
 
     def test_frontmatter_name_and_description(self):
         for s in SKILLS:
-            fm, text = frontmatter(os.path.join(SKILLS_DIR, s, "SKILL.md"))
-            self.assertIn("name: %s\n" % s, fm + "\n", s)
-            self.assertRegex(fm, r"description: ", s)
-            self.assertGreater(len(fm), 200, "%s description is too thin" % s)
-            self.assertGreater(len(text.splitlines()), 50, s)
+            skill_path = os.path.join(SKILLS_DIR, s, "SKILL.md")
+            name, desc, text = parse_skill_metadata(skill_path)
+            self.assertEqual(name, s, "Skill name must match folder: %s" % s)
+            self.assertTrue(desc, "Description is required for %s" % s)
+            self.assertGreaterEqual(len(desc), 150, "Description too thin for %s: %d chars" % (s, len(desc)))
+            self.assertLessEqual(len(desc), 350, "Description too verbose for %s: %d chars" % (s, len(desc)))
+
+    def test_local_reference_links(self):
+        for s in SKILLS:
+            skill_dir = os.path.join(SKILLS_DIR, s)
+            skill_path = os.path.join(skill_dir, "SKILL.md")
+            with open(skill_path, encoding="utf-8") as fh:
+                content = fh.read()
+            for m in re.finditer(r"\[([^\]]+)\]\(([^)]+)\)", content):
+                target = m.group(2)
+                if target.startswith(("http://", "https://", "mailto:", "#")):
+                    continue
+                target_path = target.split("#")[0].split("?")[0]
+                if target_path:
+                    resolved = os.path.normpath(os.path.join(skill_dir, target_path))
+                    self.assertTrue(os.path.exists(resolved),
+                                    "Broken link in %s: %s -> %s" % (s, target, resolved))
 
     def test_native_agents_has_no_claude_manifest(self):
         agents_dir = os.path.dirname(SKILLS_DIR)

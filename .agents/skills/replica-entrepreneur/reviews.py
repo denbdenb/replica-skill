@@ -63,11 +63,20 @@ def load_themes(path=DEFAULT_THEMES):
 
 def parse_date(text):
     text = (text or "").strip()
-    for fmt, n in (("%Y-%m-%d", 10), ("%Y-%m", 7)):
+    if not text:
+        return None
+    # YYYY-MM-DD (full date)
+    if len(text) >= 10 and text[4] == "-" and text[7] == "-":
         try:
-            return _dt.datetime.strptime(text[:n], fmt).date()
+            return _dt.date.fromisoformat(text[:10])
         except ValueError:
-            continue
+            return None
+    # YYYY-MM (partial month)
+    if len(text) >= 7 and text[4] == "-":
+        try:
+            return _dt.date.fromisoformat(text[:7] + "-01")
+        except ValueError:
+            pass
     return None
 
 
@@ -270,6 +279,16 @@ def render(result, dropped=0, dupes=0):
     return "\n".join(out) + "\n"
 
 
+def summary(result, dropped, dupes):
+    themes = result.get("themes", [])
+    top_theme = themes[0]["label"] if themes else "none"
+    requests = result.get("requests", [])
+    top_req = requests[0]["quote"][:60] if requests else "none"
+    total_rev = result.get("reviews", 0)
+    return (f"Reviews summary: {total_rev} reviews analyzed across {len(themes)} themes "
+            f"(top complaint: '{top_theme}', top request: '{top_req}', dropped: {dropped}, duplicates: {dupes}).")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("reviews", help="CSV with source,url,date,rating,text")
@@ -278,7 +297,9 @@ def main(argv=None):
                     help="reviews older than this count half (default 18)")
     ap.add_argument("--today", help="YYYY-MM-DD, for reproducible runs")
     ap.add_argument("--out", help="write the markdown report here")
-    ap.add_argument("--json", action="store_true")
+    ap.add_argument("--json", action="store_true", help="output formatted JSON")
+    ap.add_argument("--compact-json", action="store_true", help="output compact JSON on one line")
+    ap.add_argument("--summary", action="store_true", help="output single-line summary")
     args = ap.parse_args(argv)
     try:
         themes, req = load_themes(args.themes)
@@ -294,8 +315,14 @@ def main(argv=None):
     result = analyse(reviews, themes, req, today=today, months=args.months)
     result["dropped"] = dropped
     result["duplicates"] = dupes
+    if args.compact_json:
+        print(json.dumps(result, separators=(",", ":"), default=str))
+        return 0
     if args.json:
         print(json.dumps(result, indent=2, default=str))
+        return 0
+    if args.summary:
+        print(summary(result, dropped, dupes))
         return 0
     text = render(result, dropped, dupes)
     if args.out:

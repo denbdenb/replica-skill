@@ -1,15 +1,8 @@
 ---
 name: replica-design
 description: >-
-  Rebuilds an app's design system for a clone: colour roles, type scale,
-  spacing, radius, shadows and every component with its states, as design
-  tokens plus component specs, with original assets instead of the target's
-  logos, icons, illustrations or licensed fonts. Includes a WCAG contrast
-  checker. Use when the user says "match the design", "rebuild the design
-  system", "get the colours and fonts", "make it look like X", "design tokens
-  for my clone", or after /replica-architect.
+  Extracts and reconstructs clean design systems into tokens: color scales, typography, spacing, WCAG contrast verification, and component specs without copying original brand assets. Triggers: rebuild design system, design tokens, match design.
 ---
-
 # replica-design
 
 Reads `replica/recon.md` and the screenshots in `replica/screens/`. Writes

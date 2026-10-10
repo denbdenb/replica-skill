@@ -1,15 +1,8 @@
 ---
 name: replica-diff
 description: >-
-  Compares an app clone against the original: a feature parity score from the
-  feature matrix (weighted by must, should, could) with the missing list in
-  build order, plus a screenshot layout diff that ignores colour so a rebrand
-  does not count against you. Two standard-library Python tools. Use when the
-  user says "how close is my clone", "compare it to the original", "what's
-  missing", "parity check", "diff the screens", "is it ready", or after
-  /replica-test.
+  Quantifies parity between clone and original using weighted feature matrix scoring and color-agnostic screenshot layout edge-diffing via standard Python utilities. Triggers: compare with original, parity check, visual diff, layout difference.
 ---
-
 # replica-diff
 
 Two tools in this folder, both standard-library Python, no installs:

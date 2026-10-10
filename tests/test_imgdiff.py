@@ -221,6 +221,24 @@ class Cli(unittest.TestCase):
         with redirect_stderr(io.StringIO()):
             self.assertEqual(imgdiff.main(["/nope/a.png", "/nope/b.png"]), 2)
 
+    def test_compact_json_and_summary_cli(self):
+        with tempfile.TemporaryDirectory() as d:
+            a, b = os.path.join(d, "a.png"), os.path.join(d, "b.png")
+            imgdiff.write_png(a, *page())
+            imgdiff.write_png(b, *page(button_y=310))
+
+            buf_compact = io.StringIO()
+            with redirect_stdout(buf_compact):
+                self.assertEqual(imgdiff.main([a, b, "--compact-json"]), 0)
+            self.assertNotIn("\n", buf_compact.getvalue().strip())
+            data = json.loads(buf_compact.getvalue())
+            self.assertIn("score", data)
+
+            buf_sum = io.StringIO()
+            with redirect_stdout(buf_sum):
+                self.assertEqual(imgdiff.main([a, b, "--summary"]), 0)
+            self.assertIn("imgdiff layout: score", buf_sum.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()

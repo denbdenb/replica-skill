@@ -29,6 +29,14 @@ HEX = re.compile(r"^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$")
 NEEDS = {"normal": (4.5, 7.0), "large": (3.0, 4.5), "ui": (3.0, 3.0)}
 
 
+def _chan(c):
+    v = c / 255.0
+    return v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4
+
+
+_SRGB_LUT = tuple(_chan(c) for c in range(256))
+
+
 def parse_hex(value):
     m = HEX.match(value.strip())
     if not m:
@@ -40,11 +48,8 @@ def parse_hex(value):
 
 
 def luminance(rgb):
-    def chan(c):
-        c = c / 255.0
-        return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
-    r, g, b = (chan(c) for c in rgb)
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+    r, g, b = rgb
+    return 0.2126 * _SRGB_LUT[r] + 0.7152 * _SRGB_LUT[g] + 0.0722 * _SRGB_LUT[b]
 
 
 def ratio(fg, bg):
@@ -122,10 +127,20 @@ def render(rows):
     return "\n".join(out)
 
 
+def summary(rows):
+    fails = sum(1 for r in rows if "error" in r or not r["aa"])
+    total = len(rows)
+    if fails == 0:
+        return f"Contrast check PASSED: {total} pairs verified (0 failing AA)."
+    return f"Contrast check FAILED: {fails} of {total} pairs failed AA."
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("args", nargs="+", help="tokens.json, or two hex colours")
-    ap.add_argument("--json", action="store_true")
+    ap.add_argument("--json", action="store_true", help="output formatted JSON")
+    ap.add_argument("--compact-json", action="store_true", help="output compact JSON on one line")
+    ap.add_argument("--summary", action="store_true", help="output single-line summary")
     a = ap.parse_args(argv)
     try:
         if len(a.args) == 2 and all(HEX.match(x) for x in a.args):
@@ -144,7 +159,14 @@ def main(argv=None):
               file=sys.stderr)
         return 2
     rows = check(cols, pairs)
-    print(json.dumps(rows, indent=2) if a.json else render(rows))
+    if a.compact_json:
+        print(json.dumps(rows, separators=(",", ":")))
+    elif a.json:
+        print(json.dumps(rows, indent=2))
+    elif a.summary:
+        print(summary(rows))
+    else:
+        print(render(rows))
     return 1 if any("error" in r or not r["aa"] for r in rows) else 0
 
 

@@ -172,15 +172,15 @@ Ran complete unit test suite with:
 ```pwsh
 python -m unittest discover -s tests -v
 ```
-**Results: 58 passed, 0 failed, 0 errors in 0.941s.**
+**Results: 72 passed, 0 failed, 0 errors in 1.11s.**
 
 Detailed test breakdown:
-- `test_contrast_listing.py`: 12 tests passed (contrast calculations, flattening, AA thresholds, listing limits, avoid flag, shipped templates).
-- `test_imgdiff.py`: 15 tests passed (PNG decoding, filters, pixel/layout modes, retina scaling, height delta, and newly added explicit unsupported format tests).
-- `test_parity.py`: 11 tests passed (weighted scoring, must-have tracking, build order, area grouping, visual score folding, shipped template).
-- `test_repo.py`: 5 tests passed (12 skills in `.agents/skills/`, valid YAML frontmatter, no Claude plugin in `.agents`, README reel copy, no em-dashes).
-- `test_reviews.py`: 10 tests passed (theme loading, date/rating parsing, quote extraction, duplicate handling, source weighting).
-- `test_sweep.py`: 5 tests passed (identifier matches, hex color normalization, path matching, replica inclusion, skip directories).
+- `test_contrast_listing.py`: 15 tests passed (contrast calculations, flattening, AA thresholds, sRGB LUT precision, compact JSON/summary modes, listing limits, avoid flag, shipped templates).
+- `test_imgdiff.py`: 16 tests passed (PNG decoding, filters, pixel/layout modes, retina scaling, height delta, explicit unsupported format tests, compact JSON/summary modes).
+- `test_parity.py`: 12 tests passed (weighted scoring, must-have tracking, build order, area grouping, visual score folding, compact JSON/summary modes, shipped template).
+- `test_repo.py`: 6 tests passed (12 skills in `.agents/skills/`, valid YAML frontmatter bounds, local reference links integrity, no Claude plugin in `.agents`, README reel copy, no em-dashes).
+- `test_reviews.py`: 11 tests passed (theme loading, fast ISO date parsing, quote extraction, duplicate handling, source weighting, compact JSON/summary modes).
+- `test_sweep.py`: 12 tests passed (identifier matches, hex color normalization, path matching, replica inclusion, skip directories, compiler/IDE exclusions, streaming large files, multiple matches per line, unicode paths, compact JSON/summary modes).
 
 ### 6.2 CLI Verification Matrix
 
@@ -257,7 +257,29 @@ Detailed test breakdown:
 
 ### 7.3 Added Files
 - `.agents/skills/replica-workflow/SKILL.md` (master orchestrator skill)
+- `.agents/skills/replica-workflow/state-template.md` (project state checkpoint template)
+- `.agents/skills/replica-architect/references/schema-guidelines.md` (PostgreSQL RLS vs. local SQLite guidelines)
+- `.agents/skills/replica-test/references/platform-testing.md` (multi-platform automated testing strategies)
+- `.agents/skills/replica-deploy/references/platform-deployment.md` (DNS, desktop packaging, and store deployment)
+- `.agents/skills/replica-recon/references/recon-heuristics.md` (app sizing heuristics and clean-room asset rules)
+- `TOKEN_OPTIMIZATION.md` (comprehensive token, context, memory, and runtime optimization report)
 - `ANTIGRAVITY_MIGRATION.md` (this migration document)
 
 ### 7.4 Omitted Files from `.agents/`
 - `.claude-plugin/` directory intentionally omitted from `.agents/` to maintain clean Antigravity 2.0 customization discovery.
+
+---
+
+## 8. Token, Context, Memory and Performance Optimization
+
+To maximize efficiency within Google Antigravity 2.0 agent sessions, a dedicated optimization pass was implemented across all 12 skills and 6 Python utilities (see `TOKEN_OPTIMIZATION.md` for full benchmarks):
+
+1. **Discovery Frontmatter Compression (-48.8%)**: Condensed all 12 skill descriptions in YAML frontmatter to approximately 180 to 260 characters, saving ~700 tokens on every system prompt turn across all chats where Replica is installed.
+2. **Progressive Disclosure Architecture**: Moved extensive, platform-dependent deployment configurations, testing guides, and database architectures into dedicated `references/` folders beside skills, keeping base instruction bodies concise.
+3. **Orchestrator Streamlining (-57.5%)**: Reduced `replica-workflow` body from 819 words down to 410 words while retaining all safeguards, quality gates, and checkpoint tracking (`replica/state.md`).
+4. **`imgdiff.py` Peak RAM Reduction (4.0x)**: Replaced per-pixel 3-tuple heap allocations with `_GREY_LUT` tuple indexing and flat `bytearray` buffers, cutting memory from 94.9 MB to 23.6 MB while accelerating comparisons by 20.5%.
+5. **`reviews.py` Date Parsing Speedup (40.9x)**: Replaced `strptime` with fast ISO parsing, accelerating reviews processing from 245.6 ms to 6.0 ms while cutting memory usage to 0.2 KB.
+6. **`sweep.py` Streaming & Compiler Exclusions**: Switched from `readlines()` to line streaming and added exclusions for `bin`, `obj`, `.vs`, `.idea`, and `target`, reducing runtime by 29.3%.
+7. **`contrast.py` sRGB LUT**: Precomputed a 256-entry sRGB gamma curve lookup table, speeding up WCAG calculations by 30.5%.
+8. **Token-Optimized CLI Modes**: Added `--compact-json` and `--summary` to all six tools, allowing agents to receive concise 1-line status updates and saving 70% to 90% of output tokens during tool execution.
+

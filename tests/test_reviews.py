@@ -127,6 +127,40 @@ class Feedback(unittest.TestCase):
         self.assertIn("expensive", s)
         self.assertLessEqual(len(s), 106)
 
+    def test_parse_date_formats_and_edge_cases(self):
+        # Valid full date
+        self.assertEqual(reviews.parse_date("2024-03-15"), datetime.date(2024, 3, 15))
+        # Valid partial month date
+        self.assertEqual(reviews.parse_date("2023-11"), datetime.date(2023, 11, 1))
+        # Leap year valid and invalid
+        self.assertEqual(reviews.parse_date("2024-02-29"), datetime.date(2024, 2, 29))
+        self.assertIsNone(reviews.parse_date("2023-02-29"))
+        # Trailing timestamp
+        self.assertEqual(reviews.parse_date("2024-01-01 12:00:00"), datetime.date(2024, 1, 1))
+        self.assertEqual(reviews.parse_date("2024-02-28T14:30:00Z"), datetime.date(2024, 2, 28))
+        # Whitespace
+        self.assertEqual(reviews.parse_date("  2023-05-20  "), datetime.date(2023, 5, 20))
+        # Invalid inputs
+        self.assertIsNone(reviews.parse_date(""))
+        self.assertIsNone(reviews.parse_date(None))
+        self.assertIsNone(reviews.parse_date("invalid-date"))
+        self.assertIsNone(reviews.parse_date("2024-13-01"))
+        self.assertIsNone(reviews.parse_date("2024-04-31"))
+        self.assertIsNone(reviews.parse_date("2024"))
+
+    def test_compact_json_and_summary_cli(self):
+        buf_compact = io.StringIO()
+        with redirect_stdout(buf_compact):
+            self.assertEqual(reviews.main([self.path, "--compact-json", "--today", "2026-10-01"]), 0)
+        self.assertNotIn("\n", buf_compact.getvalue().strip())
+        data = json.loads(buf_compact.getvalue())
+        self.assertIn("themes", data)
+
+        buf_sum = io.StringIO()
+        with redirect_stdout(buf_sum):
+            self.assertEqual(reviews.main([self.path, "--summary", "--today", "2026-10-01"]), 0)
+        self.assertIn("Reviews summary", buf_sum.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()

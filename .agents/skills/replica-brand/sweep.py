@@ -32,7 +32,7 @@ import sys
 SKIP_DIRS = {".git", ".agents", ".agent", ".claude", "node_modules", ".next", ".nuxt",
              ".svelte-kit", "dist", "build", "out", ".vercel", ".turbo", ".cache",
              "coverage", "__pycache__", ".venv", "venv", "Pods", ".expo", "DerivedData",
-             ".gradle"}
+             ".gradle", "bin", "obj", ".vs", ".idea", "target", ".dart_tool"}
 SKIP_FILES = {"package-lock.json", "yarn.lock", "pnpm-lock.yaml", "bun.lockb",
               "Podfile.lock", "Cargo.lock", "poetry.lock"}
 BINARY_EXT = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".icns", ".pdf", ".zip",
@@ -109,20 +109,20 @@ def sweep(root, avoid=(), domains=(), colors=(), include_replica=False, max_size
                 if os.path.getsize(path) > max_size or is_binary(path):
                     continue
                 with open(path, encoding="utf-8", errors="replace") as fh:
-                    lines = fh.readlines()
+                    for i, line in enumerate(fh, 1):
+                        for kind, label, rx in pats:
+                            if rx.search(line):
+                                hits.append({"file": rel, "line": i, "kind": kind, "match": label,
+                                             "text": line.strip()[:160]})
+                        if cols and "#" in line:
+                            for m in HEX.finditer(line):
+                                nh = norm_hex(m.group(0))
+                                if nh in cols:
+                                    hits.append({"file": rel, "line": i, "kind": "color",
+                                                 "match": nh,
+                                                 "text": line.strip()[:160]})
             except OSError:
                 continue
-            for i, line in enumerate(lines, 1):
-                for kind, label, rx in pats:
-                    if rx.search(line):
-                        hits.append({"file": rel, "line": i, "kind": kind, "match": label,
-                                     "text": line.strip()[:160]})
-                if cols:
-                    for m in HEX.finditer(line):
-                        if norm_hex(m.group(0)) in cols:
-                            hits.append({"file": rel, "line": i, "kind": "color",
-                                         "match": norm_hex(m.group(0)),
-                                         "text": line.strip()[:160]})
     return hits
 
 
@@ -142,6 +142,18 @@ def render(hits):
     return "\n".join(out)
 
 
+def summary(hits):
+    if not hits:
+        return "Clean. 0 brand leaks found."
+    by_kind = {}
+    files = set()
+    for h in hits:
+        by_kind[h["kind"]] = by_kind.get(h["kind"], 0) + 1
+        files.add(h["file"])
+    kinds_str = ", ".join(f"{k}: {v}" for k, v in sorted(by_kind.items()))
+    return f"Sweep failed: {len(hits)} hits across {len(files)} files ({kinds_str})."
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("root", nargs="?", default=".")
@@ -150,7 +162,9 @@ def main(argv=None):
     ap.add_argument("--colors", default="", help="comma-separated hex colours")
     ap.add_argument("--config", help="JSON with avoid / domains / colors lists")
     ap.add_argument("--include-replica", action="store_true")
-    ap.add_argument("--json", action="store_true")
+    ap.add_argument("--json", action="store_true", help="output formatted JSON")
+    ap.add_argument("--compact-json", action="store_true", help="output compact JSON on one line")
+    ap.add_argument("--summary", action="store_true", help="output single-line summary")
     args = ap.parse_args(argv)
     avoid = [x for x in args.avoid.split(",") if x.strip()]
     domains = [x for x in args.domains.split(",") if x.strip()]
@@ -170,7 +184,14 @@ def main(argv=None):
               file=sys.stderr)
         return 2
     hits = sweep(args.root, avoid, domains, colors, args.include_replica)
-    print(json.dumps(hits, indent=2) if args.json else render(hits))
+    if args.compact_json:
+        print(json.dumps(hits, separators=(",", ":")))
+    elif args.json:
+        print(json.dumps(hits, indent=2))
+    elif args.summary:
+        print(summary(hits))
+    else:
+        print(render(hits))
     return 1 if hits else 0
 
 

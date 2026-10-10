@@ -1,15 +1,8 @@
 ---
 name: replica-launch
 description: >-
-  Writes the launch for an app clone: the landing page built on the
-  positioning angle, pricing set against the original's public pricing and
-  its users' complaints, and the App Store and Google Play listing linted
-  against the stores' limits and copycat rules. Use when the user says
-  "landing page", "pricing", "how much should I charge", "App Store
-  listing", "store screenshots", "launch plan", "Product Hunt", or after
-  /replica-brand.
+  Prepares go-to-market assets: conversion-focused landing pages, competitive pricing models, and store listing metadata linted against store length and policy guidelines. Triggers: launch plan, landing page copy, app store listing, pricing strategy.
 ---
-
 # replica-launch
 
 Reads `replica/fixes.md` (the angle and the evidence), `replica/brand.md`,

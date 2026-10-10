@@ -201,12 +201,25 @@ def render(result, markdown=False):
     return "\n".join(out)
 
 
+def summary(result):
+    score = result.get("overall", 0.0)
+    feat = result.get("feature_score", 0.0)
+    done = result.get("must_have_done", 0)
+    total = result.get("must_have_total", 0)
+    missing = len(result.get("missing", []))
+    status = "SHIPPABLE" if done == total and total > 0 else "NOT SHIPPABLE"
+    return (f"Parity {status}: score {score:.1f}% (features: {feat:.1f}%, "
+            f"must-haves: {done}/{total}, missing: {missing}).")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("matrix", help="the feature matrix CSV")
     ap.add_argument("--visual", nargs="*", default=[],
                     help="imgdiff.py --json outputs to fold in")
-    ap.add_argument("--json", action="store_true")
+    ap.add_argument("--json", action="store_true", help="output formatted JSON")
+    ap.add_argument("--compact-json", action="store_true", help="output compact JSON on one line")
+    ap.add_argument("--summary", action="store_true", help="output single-line summary")
     ap.add_argument("--markdown", action="store_true")
     ap.add_argument("--fail-under", type=float)
     args = ap.parse_args(argv)
@@ -215,8 +228,12 @@ def main(argv=None):
     except (MatrixError, OSError, ValueError) as exc:
         print("parity: %s" % exc, file=sys.stderr)
         return 2
-    if args.json:
+    if args.compact_json:
+        print(json.dumps(result, separators=(",", ":")))
+    elif args.json:
         print(json.dumps(result, indent=2))
+    elif args.summary:
+        print(summary(result))
     else:
         print(render(result, markdown=args.markdown))
     if args.fail_under is not None and result["overall"] < args.fail_under:

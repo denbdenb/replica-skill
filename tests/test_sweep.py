@@ -80,6 +80,58 @@ class Sweep(unittest.TestCase):
         with redirect_stderr(io.StringIO()):
             self.assertEqual(sweep.main([clean]), 2)
 
+    def test_multiple_matches_and_line_numbers(self):
+        # Multiple matches on one line: Calendly and Acuity Scheduling and a color
+        put(self.root, "src/multi.ts", "line 1\nconst x = 'Calendly ' + 'AcuityScheduling' + '#006bff';\nline 3\n")
+        hits = [h for h in self.run_sweep() if h["file"].endswith("multi.ts")]
+        self.assertEqual(len(hits), 3)
+        for h in hits:
+            self.assertEqual(h["line"], 2)
+        kinds = {h["kind"] for h in hits}
+        self.assertEqual(kinds, {"name", "color"})
+
+    def test_domains_and_punctuation(self):
+        put(self.root, "src/punct.ts", "const url = 'https://calendly.com/user?ref=acuity-scheduling';\n")
+        hits = [h for h in self.run_sweep() if h["file"].endswith("punct.ts")]
+        self.assertTrue(any(h["kind"] == "domain" and h["match"] == "calendly.com" for h in hits))
+
+    def test_generated_directories_skipped(self):
+        put(self.root, "bin/Debug/output.txt", "Calendly should be ignored\n")
+        put(self.root, "obj/Release/cache.txt", "Calendly should be ignored\n")
+        put(self.root, "target/debug/build.log", "Calendly should be ignored\n")
+        put(self.root, ".vs/config.txt", "Calendly should be ignored\n")
+        files = {h["file"] for h in self.run_sweep()}
+        self.assertFalse(any(f.startswith(("bin", "obj", "target", ".vs")) for f in files))
+
+    def test_large_text_file(self):
+        lines = ["function foo() { return 1; }\n"] * 5000
+        lines[2500] = "const vendor = 'Calendly';\n"
+        put(self.root, "src/large.js", "".join(lines))
+        hits = [h for h in self.run_sweep() if h["file"].endswith("large.js")]
+        self.assertEqual(len(hits), 1)
+        self.assertEqual(hits[0]["line"], 2501)
+        self.assertEqual(hits[0]["match"], "Calendly")
+
+    def test_unicode_paths(self):
+        put(self.root, "src/компонент/тест.ts", "const ref = 'Calendly';\n")
+        hits = [h for h in self.run_sweep() if "компонент" in h["file"]]
+        self.assertEqual(len(hits), 1)
+        self.assertEqual(hits[0]["match"], "Calendly")
+
+    def test_compact_json_and_summary_flags(self):
+        cfg = put(self.root, "brand.json", json.dumps({"avoid": ["Calendly"]}))
+        buf_compact = io.StringIO()
+        with redirect_stdout(buf_compact):
+            self.assertEqual(sweep.main([self.root, "--config", cfg, "--compact-json"]), 1)
+        data = json.loads(buf_compact.getvalue())
+        self.assertIsInstance(data, list)
+        self.assertNotIn("\n", buf_compact.getvalue().strip())
+
+        buf_sum = io.StringIO()
+        with redirect_stdout(buf_sum):
+            self.assertEqual(sweep.main([self.root, "--config", cfg, "--summary"]), 1)
+        self.assertIn("Sweep failed", buf_sum.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()

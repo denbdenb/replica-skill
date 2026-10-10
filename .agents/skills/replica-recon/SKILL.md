@@ -1,15 +1,8 @@
 ---
 name: replica-recon
 description: >-
-  Reverse-engineers any app into a recon map: screen inventory, user flows,
-  component list, inferred data model and a feature matrix, from public pages,
-  screenshots, app store listings, help docs and the user's own account. The
-  first step of the Replica pack. Use when the user says "clone this app",
-  "reverse engineer X", "how does X work", "map out X", "what screens does X
-  have", "I want to build my own version of X", "copy this app", or pastes an
-  app's URL or App Store link and wants to rebuild it.
+  Reverse-engineers target applications into clean-room specifications: screen inventories, user navigation flows, UI component hierarchies, and feature parity matrices. Triggers: reverse engineer app, map application, clone app, analyze target app.
 ---
-
 # replica-recon
 
 Everything else in the pack builds from what this skill writes. A bad recon
@@ -114,18 +107,13 @@ Write `replica/features.csv` (columns: feature, area, priority, original,
 clone, notes). Priority is must / should / could. `clone` starts at `no` for
 every row and gets filled in during the build. replica-diff scores it.
 
-## Step 8: what cannot be cloned
-
-List it honestly, as `skip` rows with a reason: licensed content (a music
-catalogue, a stock library), the network and its users, data the app owns,
-partner deals, hardware, regulated licences (banking, health). "Clone any
-app" means the features and the flow, not what the app owns.
+List it honestly, as `skip` rows with a reason (licensed content, proprietary data,
+network effects, regulatory licenses). For sizing guidelines (S/M/L) and non-clonable
+clean-room boundaries, consult [recon-heuristics.md](references/recon-heuristics.md).
 
 ## Step 9: size it
 
-Screens, flows, entities, and the hard parts (realtime, sync, payments,
-calendar or email integrations, offline). Give a size: S (a weekend), M (a
-few weeks), L (a quarter), XL (rescope it). No promises of a perfect clone.
+Estimate screen, flow, and entity complexity: S (weekend), M (weeks), L (months). Rescope if XL.
 
 ## Output
 

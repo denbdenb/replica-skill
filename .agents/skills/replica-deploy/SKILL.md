@@ -1,15 +1,8 @@
 ---
 name: replica-deploy
 description: >-
-  Ships an app clone live on the user's own domain: a preflight gate (tests
-  green, parity must-haves done, rebrand sweep clean, listing linted, legal
-  pages up), production database and env vars, the host, DNS records for the
-  domain and for email, Stripe live mode, OAuth redirects, monitoring, and
-  mobile builds to TestFlight and Play. Use when the user says "deploy it",
-  "ship it", "put it live", "connect my domain", "go to production",
-  "publish the app", or after /replica-launch.
+  Prepares production deployment across web, desktop, or mobile platforms: enforces preflight verification gates, DNS/hosting setup, env configurations, and release packaging. Triggers: deploy clone, production release, publish app, ship live.
 ---
-
 # replica-deploy
 
 Reads everything in `replica/`. Writes `replica/deploy.md` (the checklist in
@@ -59,25 +52,12 @@ Any failure stops the deploy. Say which and why.
 
 ## Step 3: host and domain
 
-Default: Vercel for Next.js (Netlify, Cloudflare Pages, Fly or Render
-otherwise). Connect the repo so `main` deploys and pull requests get preview
-URLs.
+Default: Vercel for Next.js, Cloudflare Pages, Netlify, or Fly.io. Connect the repo
+so `main` deploys and pull requests receive preview URLs.
 
-The domain, after the user buys it at any registrar:
-
-| record | name | value |
-| --- | --- | --- |
-| A | @ | the host's apex IP (Vercel: shown in the domain settings) |
-| CNAME | www | the host's target (Vercel: `cname.vercel-dns.com`) |
-| TXT | @ or a subdomain | the host's verification value, if asked |
-
-Email DNS from the email provider: SPF (TXT), DKIM (CNAME or TXT), and a
-DMARC record starting at `v=DMARC1; p=none; rua=mailto:you@yourdomain` then
-tightened to `quarantine` once reports are clean. Without these, your
-confirmation emails go to spam.
-
-Pick one canonical host (apex or www) and redirect the other. HTTPS is
-automatic on the hosts above; check it.
+For full DNS record templates (A, CNAME, SPF, DKIM, DMARC) and distribution packaging
+workflows (Windows MSIX, macOS DMG, Android AAB, iOS App Store, Docker), consult
+[platform-deployment.md](references/platform-deployment.md).
 
 ## Step 4: watch it
 
@@ -85,15 +65,6 @@ Error tracking (Sentry or the host's), uptime checks on the home page and the
 core flow's API, logs kept, analytics (a privacy-friendly one avoids the
 cookie banner), and an alert to the user's email or phone. Then do the core
 flow on the live site yourself, and ask the user to do it on their phone.
-
-## Step 5: distribution (mobile / desktop / CLI)
-
-- **Mobile**: Expo `eas build` and `eas submit`; native Xcode archive to App
-  Store Connect; Android Gradle bundle to Google Play Console. Beta testing first.
-- **Desktop**: MSIX or self-contained executable for Windows (WinApp / WinUI),
-  DMG / notarization for macOS, or GitHub Releases.
-- **CLI / Backend**: Container image to registry (Docker / GHCR), package manager
-  release (PyPI / npm / crates.io), or binary release assets.
 
 ## Output
 

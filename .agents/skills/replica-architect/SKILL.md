@@ -1,15 +1,8 @@
 ---
 name: replica-architect
 description: >-
-  Plans the stack, database schema and API for an app clone, from the recon
-  map replica-recon wrote. Picks boring, managed tech, turns the inferred data
-  model into real SQL with indexes and access rules, lists every route by
-  flow, and orders the build as a thin vertical slice first. Use when the user
-  says "plan the clone", "what stack should I use", "design the database",
-  "write the schema", "plan the API", "architecture for my version of X", or
-  after /replica-recon finishes.
+  Plans technology stack, database schema, and API route architecture from a recon map. Converts data models to SQL with access rules and orders implementation as thin vertical slices. Triggers: plan the clone, design database, stack architecture.
 ---
-
 # replica-architect
 
 Reads `replica/recon.md` and `replica/features.csv`. Writes
@@ -49,26 +42,7 @@ Turn the inferred data model into SQL. For every table:
 - access rules: Postgres row level security on Supabase, or one
   authorisation check per query in the data layer. Write which.
 
-Example, for a booking app:
-
-```sql
-create table bookings (
-  id uuid primary key default gen_random_uuid(),
-  event_type_id uuid not null references event_types(id) on delete cascade,
-  host_id uuid not null references users(id) on delete cascade,
-  start_at timestamptz not null,
-  end_at timestamptz not null,
-  guest_name text not null,
-  guest_email text not null,
-  guest_timezone text not null,
-  status text not null default 'confirmed'
-    check (status in ('confirmed','cancelled','rescheduled')),
-  answers jsonb not null default '{}',
-  created_at timestamptz not null default now(),
-  constraint no_zero_length check (end_at > start_at)
-);
-create index on bookings (host_id, start_at);
-```
+For platform-specific schema templates, SQL examples, and storage patterns (Web Postgres RLS vs. Desktop/Mobile SQLite), refer to [schema-guidelines.md](references/schema-guidelines.md).
 
 Then the hard constraints the recon found. Two guests booking the same slot
 is a database problem (an exclusion constraint or a unique index), not a UI

@@ -1,15 +1,8 @@
 ---
 name: replica-brand
 description: >-
-  Names and rebrands an app clone so it is the user's own: name candidates
-  with the trademark, domain, store and handle checks to run, a new palette
-  checked for contrast, a logo brief, a voice guide, and a sweep tool that
-  finds anything of the original left in the codebase. Use when the user says
-  "name my app", "rebrand the clone", "make it mine", "pick a name and
-  colours", "logo brief", "brand voice", "check for leftovers", or after
-  /replica-entrepreneur. Always runs before /replica-launch.
+  Rebrands an app clone with trademark-cleared names, WCAG-checked color palettes, logo briefs, voice guides, and automated brand sweep audits against original assets. Triggers: rebrand the clone, pick brand name, brand voice, sweep check.
 ---
-
 # replica-brand
 
 Nothing launches under the original's identity. This skill is the line

@@ -1,5 +1,8 @@
 # The Replica skill
 
+> [!NOTE]
+> **Google Antigravity 2.0 Port**: This repository is a native port of the original [Replica skill pack for Claude by Jake Schincariol](https://github.com/Jakeschincariol/replica-skill). It adapts all 11 skills for Google Antigravity 2.0, standardizes Python utilities to run from the project root across Windows/macOS/Linux without external dependencies, makes workflows platform-aware (Web, Windows Desktop, Android APK, iOS, CLI), and adds a dedicated `replica-workflow` orchestrator.
+
 Eleven modular skills plus one master orchestrator for Google Antigravity 2.0 that clone any app. Free, MIT, no signup, no API key, nothing to connect.
 
 One reverse-engineers the app you want to clone. One rebuilds it. One tests it for bugs. And one is the Entrepreneur: it reads what the app's users hate and fixes it in yours, so you have an app you can sell.
@@ -10,27 +13,39 @@ In between, the others plan the stack and the database, rebuild the design syste
 
 ## Install in Google Antigravity 2.0
 
-### Workspace install (Recommended)
-Place the skills in `.agents/skills/` at the root of your project:
+### Option A: Global Install (All Projects & Chats)
+Install once to make Replica available across all workspaces on your machine:
 
 **Windows (PowerShell):**
 ```powershell
-git clone https://github.com/Jakeschincariol/replica-skill.git
-New-Item -ItemType Directory -Force -Path ".agents\skills"
-Copy-Item -Recurse replica-skill\.agents\skills\* .agents\skills\
+git clone https://github.com/denbdenb/replica-skill.git
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.gemini\config\skills"
+Copy-Item -Recurse -Force replica-skill\.agents\skills\* "$env:USERPROFILE\.gemini\config\skills\"
 ```
 
 **macOS / Linux (Bash):**
 ```bash
-git clone https://github.com/Jakeschincariol/replica-skill.git
+git clone https://github.com/denbdenb/replica-skill.git
+mkdir -p ~/.gemini/config/skills
+cp -r replica-skill/.agents/skills/* ~/.gemini/config/skills/
+```
+
+### Option B: Workspace Install (Single Project)
+Install locally in a specific project's `.agents/skills/` folder:
+
+**Windows (PowerShell):**
+```powershell
+git clone https://github.com/denbdenb/replica-skill.git
+New-Item -ItemType Directory -Force -Path ".agents\skills"
+Copy-Item -Recurse -Force replica-skill\.agents\skills\* .agents\skills\
+```
+
+**macOS / Linux (Bash):**
+```bash
+git clone https://github.com/denbdenb/replica-skill.git
 mkdir -p .agents/skills
 cp -r replica-skill/.agents/skills/* .agents/skills/
 ```
-
-### Global install (All workspaces)
-Copy the skills to your global Antigravity config directory:
-- Windows: `C:\Users\<user>\.gemini\config\skills\`
-- macOS/Linux: `~/.gemini/config/skills/`
 
 The utilities require Python 3.8 or newer (`python` on Windows, `python3` on Unix). Standard library only: nothing to pip install.
 
@@ -124,8 +139,8 @@ python -m unittest discover -s tests -v
 
 ## Credit
 
-Original Claude skill pack by Jake Schincariol, [opusjake.ai](https://opusjake.ai).
-Google Antigravity 2.0 native edition adapted with cross-platform utilities, platform-aware workflows, and workflow orchestration.
+- **Original Claude Skill Pack**: Designed and created by Jake Schincariol ([opusjake.ai](https://opusjake.ai), [Original Repository](https://github.com/Jakeschincariol/replica-skill)).
+- **Google Antigravity 2.0 Port**: Ported by Denis Borisenko ([denbdenb](https://github.com/denbdenb)). Adds native `.agents/skills/` packaging, cross-platform execution on Windows/macOS/Linux, multi-platform app support (Web, Windows Desktop, Android APK, iOS, CLI), and workflow orchestration (`replica-workflow`).
 
 ## License
 

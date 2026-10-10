@@ -2,6 +2,8 @@
 
 > [!NOTE]
 > **Google Antigravity 2.0 Port**: This repository is a native port of the original [Replica skill pack for Claude by Jake Schincariol](https://github.com/Jakeschincariol/replica-skill). It adapts all 11 skills for Google Antigravity 2.0, standardizes Python utilities to run from the project root across Windows/macOS/Linux without external dependencies, makes workflows platform-aware (Web, Windows Desktop, Android APK, iOS, CLI), and adds a dedicated `replica-workflow` orchestrator.
+>
+> **Инструкция на русском языке**: Подробное руководство по использованию и архитектуре проекта доступно в файле [GUIDE_RU.md](file:///GUIDE_RU.md).
 
 Eleven modular skills plus one master orchestrator for Google Antigravity 2.0 that clone any app. Free, MIT, no signup, no API key, nothing to connect.
 

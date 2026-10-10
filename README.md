@@ -154,7 +154,7 @@ python -m unittest discover -s tests -v
 ## Credit
 
 - **Original Claude Skill Pack**: Designed and created by Jake Schincariol ([opusjake.ai](https://opusjake.ai), [Original Repository](https://github.com/Jakeschincariol/replica-skill)).
-- **Google Antigravity 2.0 Port**: Ported by Denis Borisenko ([denbdenb](https://github.com/denbdenb)). Adds native `.agents/skills/` packaging, cross-platform execution on Windows/macOS/Linux, multi-platform app support (Web, Windows Desktop, Android APK, iOS, CLI), and workflow orchestration (`replica-workflow`).
+- **Google Antigravity 2.0 Port**: Ported by denb ([denbdenb](https://github.com/denbdenb)). Adds native `.agents/skills/` packaging, cross-platform execution on Windows/macOS/Linux, multi-platform app support (Web, Windows Desktop, Android APK, iOS, CLI), and workflow orchestration (`replica-workflow`).
 
 ## License
 
